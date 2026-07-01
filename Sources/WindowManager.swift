@@ -102,10 +102,11 @@ final class DraggableDesktopWindow: NSWindow {
     }
 
     /// "Add time zone" submenu: the curated city list from CityRegistry.
+    /// Each item shows "City (UTC±X)" so the offset is visible while choosing.
     private func buildAddSubmenu() -> NSMenuItem {
         let sub = NSMenu(title: l10n.tr(L10nKey.addTimezone))
         for city in CityRegistry.cities {
-            let item = NSMenuItem(title: city.localizedName(l10n.language),
+            let item = NSMenuItem(title: city.label(l10n.language),
                                   action: #selector(addClock(_:)), keyEquivalent: "")
             item.target = self
             item.representedObject = city.tzID

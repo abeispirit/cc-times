@@ -72,11 +72,9 @@ struct ClockCardView: View {
         }
     }
 
-    /// City name (localized) followed by its UTC offset, e.g. "北京 UTC+8".
+    /// City name in the currently selected language.
     private var cityName: String {
-        let name = CityRegistry.localizedName(for: config.timeZoneID, language)
-        let offset = City.formatUTCOffset(seconds: config.timeZone.secondsFromGMT())
-        return "\(name) \(offset)"
+        CityRegistry.localizedName(for: config.timeZoneID, language)
     }
 
     /// 24-hour digital time in the card's time zone. Formatter is cached
