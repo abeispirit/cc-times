@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Horizontal row of all clock cards, redrawn every second via TimelineView.
+/// Each card is colored by its effective theme (per-clock override, else global).
 /// The full-mode background fills the window so dragging works anywhere;
 /// compact mode uses fixedSize so the window hugs its content.
 struct ClockRowView: View {
@@ -14,7 +15,8 @@ struct ClockRowView: View {
                     HStack(spacing: Const.compactSpacing) {
                         ForEach(store.clocks) { clock in
                             ClockCardView(config: clock, now: context.date,
-                                          compact: true, language: l10n.language)
+                                          compact: true, language: l10n.language,
+                                          palette: palette(for: clock))
                         }
                     }
                     .padding(Const.compactPadding)
@@ -23,7 +25,8 @@ struct ClockRowView: View {
                     HStack(spacing: Const.fullSpacing) {
                         ForEach(store.clocks) { clock in
                             ClockCardView(config: clock, now: context.date,
-                                          compact: false, language: l10n.language)
+                                          compact: false, language: l10n.language,
+                                          palette: palette(for: clock))
                         }
                     }
                     .padding(Const.fullPadding)
@@ -33,6 +36,11 @@ struct ClockRowView: View {
                 }
             }
         }
+    }
+
+    /// Resolve the palette for a clock: its override theme if set, else global.
+    private func palette(for clock: ClockConfig) -> Palette {
+        clock.effectiveTheme(global: store.settings.theme).palette
     }
 
     private enum Const {

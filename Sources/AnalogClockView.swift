@@ -2,9 +2,11 @@ import SwiftUI
 
 /// Analog clock face drawn with Canvas. Hand angles are derived from the
 /// hour/minute/second components of `date` interpreted in the given time zone.
+/// Colors come from the supplied `palette` so the face matches its card theme.
 struct AnalogClockView: View {
     let timeZone: TimeZone
     let now: Date
+    let palette: Palette
 
     var body: some View {
         Canvas { ctx, size in
@@ -19,14 +21,15 @@ struct AnalogClockView: View {
             let m = CGFloat(comps.minute ?? 0)
             let s = CGFloat(comps.second ?? 0)
 
-            // Face: translucent dark disc + thin ring.
+            // Face: translucent disc (solid or gradient) + thin ring.
             let faceRect = CGRect(x: center.x - radius, y: center.y - radius,
                                   width: radius * 2, height: radius * 2)
-            ctx.fill(Path(ellipseIn: faceRect), with: .color(.black.opacity(Const.faceOpacity)))
-            ctx.stroke(Path(ellipseIn: faceRect), with: .color(.white.opacity(Const.ringOpacity)),
+            let facePath = Path(ellipseIn: faceRect)
+            fillBackground(palette.faceBackground, in: faceRect, ctx: &ctx, path: facePath)
+            ctx.stroke(facePath, with: .color(palette.textColor.opacity(Const.ringOpacity)),
                        lineWidth: Const.ringWidth)
 
-            // 12 tick marks (cardinal ticks thicker).
+            // 12 tick marks (cardinal ticks thicker / more opaque).
             for i in 0..<12 {
                 let cardinal = i % 3 == 0
                 let tickLen = cardinal ? Const.cardinalTickLen : Const.minorTickLen
@@ -35,8 +38,9 @@ struct AnalogClockView: View {
                                     y: center.y + sin(angle) * radius)
                 let inner = CGPoint(x: center.x + cos(angle) * (radius - tickLen),
                                     y: center.y + sin(angle) * (radius - tickLen))
+                let opacity = cardinal ? Const.cardinalTickOpacity : palette.tickOpacity
                 ctx.stroke(Path { p in p.move(to: outer); p.addLine(to: inner) },
-                           with: .color(.white.opacity(cardinal ? Const.cardinalTickOpacity : Const.minorTickOpacity)),
+                           with: .color(palette.textColor.opacity(opacity)),
                            lineWidth: cardinal ? Const.cardinalTickWidth : Const.minorTickWidth)
             }
 
@@ -46,16 +50,16 @@ struct AnalogClockView: View {
             let secAngle  = s * 6 - 90
 
             drawHand(ctx, center, angleDeg: hourAngle, length: radius * Const.hourHandRatio,
-                     width: Const.hourHandWidth, color: .white.opacity(Const.hourHandOpacity))
+                     width: Const.hourHandWidth, color: palette.textColor.opacity(Const.hourHandOpacity))
             drawHand(ctx, center, angleDeg: minAngle, length: radius * Const.minuteHandRatio,
-                     width: Const.minuteHandWidth, color: .white.opacity(Const.minuteHandOpacity))
+                     width: Const.minuteHandWidth, color: palette.textColor.opacity(Const.minuteHandOpacity))
             drawHand(ctx, center, angleDeg: secAngle, length: radius * Const.secondHandRatio,
-                     width: Const.secondHandWidth, color: .red.opacity(Const.secondHandOpacity))
+                     width: Const.secondHandWidth, color: palette.secondHandColor.opacity(Const.secondHandOpacity))
 
             // Center cap.
             let capRect = CGRect(x: center.x - Const.capRadius, y: center.y - Const.capRadius,
                                  width: Const.capRadius * 2, height: Const.capRadius * 2)
-            ctx.fill(Path(ellipseIn: capRect), with: .color(.white))
+            ctx.fill(Path(ellipseIn: capRect), with: .color(palette.textColor))
         }
         .frame(width: Const.faceSize, height: Const.faceSize)
     }
@@ -68,20 +72,32 @@ struct AnalogClockView: View {
                    with: .color(color), lineWidth: width)
     }
 
+    /// Fill a path with the background style (solid color or linear gradient).
+    private func fillBackground(_ bg: BackgroundStyle, in rect: CGRect,
+                                ctx: inout GraphicsContext, path: Path) {
+        switch bg {
+        case .solid(let c):
+            ctx.fill(path, with: .color(c))
+        case .gradient(let stops):
+            ctx.fill(path, with: .linearGradient(
+                Gradient(colors: stops),
+                startPoint: .init(x: rect.minX, y: rect.minY),
+                endPoint: .init(x: rect.maxX, y: rect.maxY)))
+        }
+    }
+
     // MARK: - Drawing constants
 
     private enum Const {
         static let faceSize: CGFloat = 120
         static let faceInset: CGFloat = 4
 
-        static let faceOpacity = 0.35
         static let ringOpacity = 0.5
         static let ringWidth: CGFloat = 2
 
         static let cardinalTickLen: CGFloat = 12
         static let minorTickLen: CGFloat = 7
         static let cardinalTickOpacity = 0.9
-        static let minorTickOpacity = 0.4
         static let cardinalTickWidth: CGFloat = 2.5
         static let minorTickWidth: CGFloat = 1.2
 

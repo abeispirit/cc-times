@@ -33,6 +33,9 @@ enum L10nKey {
     static let addTimezone = "add_timezone"
     static let opacity = "opacity"
     static let language = "language"
+    static let theme = "theme"
+    static let perClockColor = "per_clock_color"
+    static let followGlobal = "follow_global"
 
     // Toggle items
     static let alwaysOnTop = "always_on_top"
@@ -82,6 +85,9 @@ final class L10n: ObservableObject {
         L10nKey.addTimezone:    "Add Time Zone",
         L10nKey.opacity:        "Window Opacity",
         L10nKey.language:       "Language",
+        L10nKey.theme:          "Theme",
+        L10nKey.perClockColor:  "Per-Clock Color",
+        L10nKey.followGlobal:   "Follow Global",
         L10nKey.alwaysOnTop:    "Always on Top",
         L10nKey.compactMode:    "Compact (digits only)",
         L10nKey.quit:           "Quit",
@@ -92,6 +98,9 @@ final class L10n: ObservableObject {
         L10nKey.addTimezone:    "添加时区",
         L10nKey.opacity:        "窗口透明度",
         L10nKey.language:       "语言",
+        L10nKey.theme:          "主题",
+        L10nKey.perClockColor:  "单独配色",
+        L10nKey.followGlobal:   "跟随全局",
         L10nKey.alwaysOnTop:    "常驻置顶",
         L10nKey.compactMode:    "简版(仅数字)",
         L10nKey.quit:           "退出",

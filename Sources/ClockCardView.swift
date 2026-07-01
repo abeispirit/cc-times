@@ -3,11 +3,13 @@ import SwiftUI
 /// A single clock card.
 /// - Full mode: vertical stack of analog face / city name / digital time.
 /// - Compact mode: horizontal row of city name + digital time (no face).
+/// All colors come from `palette` so the card matches its assigned theme.
 struct ClockCardView: View {
     let config: ClockConfig
     let now: Date
     let compact: Bool
     let language: Language
+    let palette: Palette
 
     var body: some View {
         if compact {
@@ -21,11 +23,14 @@ struct ClockCardView: View {
 
     private var fullBody: some View {
         VStack(spacing: Const.stackSpacing) {
-            AnalogClockView(timeZone: config.timeZone, now: now)
+            AnalogClockView(timeZone: config.timeZone, now: now, palette: palette)
             chip(text: cityName, size: Const.cityFontSize, weight: .semibold, design: .rounded)
             chip(text: digitalString, size: Const.timeFontSizeFull, weight: .medium, design: .monospaced)
         }
         .padding(Const.cardPadding)
+        .background {
+            cardBackground.clipShape(RoundedRectangle(cornerRadius: Const.cardRadius))
+        }
     }
 
     private var compactBody: some View {
@@ -35,20 +40,36 @@ struct ClockCardView: View {
         }
         .padding(.horizontal, Const.compactHPad)
         .padding(.vertical, Const.compactVPad)
-        .background(Const.cardBg, in: RoundedRectangle(cornerRadius: Const.cardRadius))
+        .background {
+            cardBackground.clipShape(RoundedRectangle(cornerRadius: Const.cardRadius))
+        }
     }
 
     // MARK: - Helpers
 
-    /// Small rounded "chip" with the translucent dark background used for both
-    /// the city name and the digital time, to keep styles consistent.
+    /// Small rounded "chip" behind text. A subtle dark scrim keeps text legible
+    /// over both solid and gradient card backgrounds.
     private func chip(text: String, size: CGFloat, weight: Font.Weight, design: Font.Design) -> some View {
         Text(text)
             .font(.system(size: size, weight: weight, design: design))
-            .foregroundColor(textColor)
+            .foregroundColor(palette.textColor.opacity(palette.textOpacity))
             .padding(.horizontal, Const.chipHPad)
             .padding(.vertical, Const.chipVPad)
-            .background(Const.cardBg, in: RoundedRectangle(cornerRadius: Const.cardRadius))
+            .background {
+                palette.chipBackground.clipShape(RoundedRectangle(cornerRadius: Const.chipRadius))
+            }
+    }
+
+    /// Card background resolving solid vs gradient.
+    @ViewBuilder
+    private var cardBackground: some View {
+        switch palette.cardBackground {
+        case .solid(let c):
+            c
+        case .gradient(let stops):
+            LinearGradient(colors: stops,
+                           startPoint: .topLeading, endPoint: .bottomTrailing)
+        }
     }
 
     /// City name in the currently selected language.
@@ -63,7 +84,6 @@ struct ClockCardView: View {
         return Self.formatter.string(from: now)
     }
 
-    private var textColor: Color { .white.opacity(Const.textOpacity) }
     private static var formatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "HH:mm"
@@ -83,9 +103,7 @@ struct ClockCardView: View {
         static let chipHPad: CGFloat = 10
         static let chipVPad: CGFloat = 3
 
-        static let cardBgOpacity = 0.35
-        static var cardBg: Color { Color.black.opacity(cardBgOpacity) }
-        static let cardRadius: CGFloat = 6
-        static let textOpacity = 0.95
+        static let cardRadius: CGFloat = 12
+        static let chipRadius: CGFloat = 6
     }
 }
