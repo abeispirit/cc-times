@@ -13,8 +13,12 @@ final class WindowManager {
         let rootView = ClockRowView(store: store)
         let hosting = NSHostingController(rootView: rootView)
 
+        // 简版模式用紧凑尺寸,完整模式用大尺寸
+        let initialSize = store.compact
+            ? NSSize(width: 360, height: 60)
+            : NSSize(width: 760, height: 240)
         let w = DraggableDesktopWindow(
-            contentRect: NSSize(width: 760, height: 240),
+            contentRect: initialSize,
             store: store
         )
         w.contentViewController = hosting
@@ -31,17 +35,24 @@ final class WindowManager {
 
         // 定位到主屏顶部居中
         let mainScreen = NSScreen.screens.first { $0.frame.origin == .zero } ?? NSScreen.main ?? NSScreen.screens.first
+        // 锁定窗口尺寸,覆盖 hosting 自动调整
+        let lockedSize = store.compact
+            ? NSSize(width: 360, height: 60)
+            : NSSize(width: 760, height: 240)
+        w.setContentSize(lockedSize)
+        w.contentMinSize = NSSize(width: 200, height: 50)
         if let screen = mainScreen {
             let vf = screen.visibleFrame
-            let winSize = w.frame.size
-            let x = vf.midX - winSize.width / 2
-            let y = vf.maxY - winSize.height - 30
+            let x = vf.midX - lockedSize.width / 2
+            let y = vf.maxY - lockedSize.height - 30
             w.setFrameOrigin(NSPoint(x: x, y: y))
         } else {
             w.center()
         }
 
         w.makeKeyAndOrderFront(nil)
+        // 再锁一次,防止 hosting 在显示后改尺寸
+        w.setContentSize(lockedSize)
         self.window = w
     }
 }
@@ -163,8 +174,16 @@ final class DraggableDesktopWindow: NSWindow {
 
     @objc private func toggleCompact() {
         store.compact.toggle()
-        // 切换后卡片尺寸变化,按当前内容重新紧贴窗口
-        self.setContentSize(self.contentView?.fittingSize ?? self.frame.size)
+        // 切换后用固定合理尺寸,不用 fittingSize(它在 .infinity 下会算错)
+        let newSize: NSSize = store.compact
+            ? NSSize(width: 360, height: 60)
+            : NSSize(width: 760, height: 240)
+        var f = self.frame
+        // 保持窗口水平居中位置不变,按新尺寸调整
+        let oldCenterX = f.midX
+        f.size = newSize
+        f.origin.x = oldCenterX - newSize.width / 2
+        self.setFrame(f, display: true, animate: false)
     }
 
     @objc private func addClock(_ sender: NSMenuItem) {
