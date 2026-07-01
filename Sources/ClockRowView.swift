@@ -1,35 +1,44 @@
 import SwiftUI
 
-/// 横排所有时钟卡片,用 TimelineView 每秒驱动重绘。
-/// 背景用一个透明可交互层,让 isMovableByWindowBackground 能接管拖动。
+/// Horizontal row of all clock cards, redrawn every second via TimelineView.
+/// The full-mode background fills the window so dragging works anywhere;
+/// compact mode uses fixedSize so the window hugs its content.
 struct ClockRowView: View {
     @ObservedObject var store: ClockStore
+    @ObservedObject var l10n: L10n
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             Group {
-                if store.compact {
-                    // 简版:横排,紧贴内容。用 fixedSize 让内容撑开真实大小
-                    HStack(spacing: 8) {
+                if store.settings.compact {
+                    HStack(spacing: Const.compactSpacing) {
                         ForEach(store.clocks) { clock in
-                            ClockCardView(config: clock, now: context.date, compact: true)
+                            ClockCardView(config: clock, now: context.date,
+                                          compact: true, language: l10n.language)
                         }
                     }
-                    .padding(12)
-                    .fixedSize()   // 按内容真实大小,不被窗口压缩
+                    .padding(Const.compactPadding)
+                    .fixedSize()
                 } else {
-                    // 完整:横排表盘,背景填满窗口便于拖动
-                    HStack(spacing: 6) {
+                    HStack(spacing: Const.fullSpacing) {
                         ForEach(store.clocks) { clock in
-                            ClockCardView(config: clock, now: context.date, compact: false)
+                            ClockCardView(config: clock, now: context.date,
+                                          compact: false, language: l10n.language)
                         }
                     }
-                    .padding(20)
+                    .padding(Const.fullPadding)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color.clear)
                     .contentShape(Rectangle())
                 }
             }
         }
+    }
+
+    private enum Const {
+        static let fullPadding: CGFloat = 20
+        static let compactPadding: CGFloat = 12
+        static let fullSpacing: CGFloat = 6
+        static let compactSpacing: CGFloat = 8
     }
 }

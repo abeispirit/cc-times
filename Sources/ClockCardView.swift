@@ -1,12 +1,13 @@
 import SwiftUI
 
-/// 单个时钟卡片。
-/// 完整模式:纵向 [表盘] / [城市名] / [数字时间]
-/// 简版模式:横向 [城市名] [数字时间],无表盘,更紧凑
+/// A single clock card.
+/// - Full mode: vertical stack of analog face / city name / digital time.
+/// - Compact mode: horizontal row of city name + digital time (no face).
 struct ClockCardView: View {
     let config: ClockConfig
     let now: Date
     let compact: Bool
+    let language: Language
 
     var body: some View {
         if compact {
@@ -16,48 +17,75 @@ struct ClockCardView: View {
         }
     }
 
-    /// 完整模式
+    // MARK: - Layouts
+
     private var fullBody: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Const.stackSpacing) {
             AnalogClockView(timeZone: config.timeZone, now: now)
-
-            Text(config.city)
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
-                .foregroundColor(.white)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 3)
-                .background(Color.black.opacity(0.35), in: RoundedRectangle(cornerRadius: 6))
-
-            Text(digitalString)
-                .font(.system(size: 18, weight: .medium, design: .monospaced))
-                .foregroundColor(.white.opacity(0.95))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 2)
-                .background(Color.black.opacity(0.35), in: RoundedRectangle(cornerRadius: 6))
+            chip(text: cityName, size: Const.cityFontSize, weight: .semibold, design: .rounded)
+            chip(text: digitalString, size: Const.timeFontSizeFull, weight: .medium, design: .monospaced)
         }
-        .padding(10)
+        .padding(Const.cardPadding)
     }
 
-    /// 简版模式:仅城市名 + 数字时间,横排一行
     private var compactBody: some View {
-        HStack(spacing: 8) {
-            Text(config.city)
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
-                .foregroundColor(.white)
-            Text(digitalString)
-                .font(.system(size: 15, weight: .medium, design: .monospaced))
-                .foregroundColor(.white.opacity(0.95))
+        HStack(spacing: Const.compactSpacing) {
+            chip(text: cityName, size: Const.cityFontSize, weight: .semibold, design: .rounded)
+            chip(text: digitalString, size: Const.timeFontSizeCompact, weight: .medium, design: .monospaced)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 5)
-        .background(Color.black.opacity(0.35), in: RoundedRectangle(cornerRadius: 6))
+        .padding(.horizontal, Const.compactHPad)
+        .padding(.vertical, Const.compactVPad)
+        .background(Const.cardBg, in: RoundedRectangle(cornerRadius: Const.cardRadius))
     }
 
-    /// 24 小时制数字时间,按该时区格式化
+    // MARK: - Helpers
+
+    /// Small rounded "chip" with the translucent dark background used for both
+    /// the city name and the digital time, to keep styles consistent.
+    private func chip(text: String, size: CGFloat, weight: Font.Weight, design: Font.Design) -> some View {
+        Text(text)
+            .font(.system(size: size, weight: weight, design: design))
+            .foregroundColor(textColor)
+            .padding(.horizontal, Const.chipHPad)
+            .padding(.vertical, Const.chipVPad)
+            .background(Const.cardBg, in: RoundedRectangle(cornerRadius: Const.cardRadius))
+    }
+
+    /// City name in the currently selected language.
+    private var cityName: String {
+        CityRegistry.localizedName(for: config.timeZoneID, language)
+    }
+
+    /// 24-hour digital time in the card's time zone. Formatter is cached
+    /// (TimelineView redraws every second, so re-creating it would waste work).
     private var digitalString: String {
-        let fmt = DateFormatter()
-        fmt.timeZone = config.timeZone
-        fmt.dateFormat = "HH:mm"
-        return fmt.string(from: now)
+        Self.formatter.timeZone = config.timeZone
+        return Self.formatter.string(from: now)
+    }
+
+    private var textColor: Color { .white.opacity(Const.textOpacity) }
+    private static var formatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm"
+        return f
+    }()
+
+    private enum Const {
+        static let stackSpacing: CGFloat = 8
+        static let cardPadding: CGFloat = 10
+        static let compactSpacing: CGFloat = 8
+        static let compactHPad: CGFloat = 10
+        static let compactVPad: CGFloat = 5
+
+        static let cityFontSize: CGFloat = 13
+        static let timeFontSizeFull: CGFloat = 18
+        static let timeFontSizeCompact: CGFloat = 15
+        static let chipHPad: CGFloat = 10
+        static let chipVPad: CGFloat = 3
+
+        static let cardBgOpacity = 0.35
+        static var cardBg: Color { Color.black.opacity(cardBgOpacity) }
+        static let cardRadius: CGFloat = 6
+        static let textOpacity = 0.95
     }
 }
