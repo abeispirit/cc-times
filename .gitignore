@@ -1,0 +1,13 @@
+# 编译产物
+/mtimes
+/.build/
+
+# 日志
+/logs/
+
+# macOS
+.DS_Store
+
+# SwiftPM
+Package.resolved
+*.xcodeproj
