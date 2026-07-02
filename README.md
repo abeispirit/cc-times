@@ -16,33 +16,35 @@ quietly out of the way.
 ## Features | 特性
 
 - 🕐 **Multi-timezone at a glance** — each clock shows an analog face + city name + digital time
-- 🌍 **Add / remove time zones** — curated list of 14 world cities via right-click
+- 🌍 **Add / remove time zones** — curated list of 24 world cities (one per whole-hour UTC offset)
 - 📏 **Two display modes** — full (analog + digits) or compact (digits + city only)
+- 🎨 **6 color themes** — Midnight / Slate / Sand (solid) + Neon Black / Aurora / Sunset (gradients)
+- 🌈 **Per-clock color** — override the theme for individual clocks, or follow the global one
 - 🌐 **Bilingual UI** — switch between **English** and **中文** at runtime
 - 🪟 **Transparent floating window** — borderless, dark translucent, won't block your view
 - ✋ **Draggable** — drag anywhere, across main and external displays
 - 🎚️ **Adjustable opacity** — 100% / 80% / 60% / 45% / 30%
 - 📌 **Always-on-top toggle** — float over windows or behave like a normal one
-- 💾 **Settings persist** — your clocks, language, and preferences survive restarts
+- 💾 **Settings persist** — your clocks, language, theme, and preferences survive restarts
 - ⏱️ **DST-aware** — daylight saving handled automatically by the system time zone database
 
 ## Screenshots | 截图
 
-```
-Full mode
-┌──────────────────────────────────────────────┐
-│   ╭────────╮   ╭────────╮   ╭────────╮        │
-│   │   🕐   │   │   🕒   │   │   🕔   │        │
-│   │Beijing │   │ Tokyo  │   │New York│        │
-│   │ 14:30  │   │ 15:30  │   │ 02:30  │        │
-│   ╰────────╯   ╰────────╯   ╰────────╯        │
-└──────────────────────────────────────────────┘
+**Per-clock colors** — each clock can have its own theme:
+<br><img src="screenshots/full-multicolor.png" width="640" alt="per-clock colors">
 
-Compact mode
-┌─────────────────────────────────────┐
-│  Beijing 22:30   New York 09:30     │
-└─────────────────────────────────────┘
-```
+**Neon Black** · the "colorful black" gradient theme:
+<br><img src="screenshots/full-neonblack.png" width="640" alt="neon black">
+
+**Aurora** and **Sunset** gradient themes:
+<br><img src="screenshots/full-aurora.png" width="640" alt="aurora">
+
+**Midnight** · the default solid theme:
+<br><img src="screenshots/full-midnight.png" width="640" alt="midnight">
+
+**Compact mode** · digits + city only:
+<br><img src="screenshots/compact.png" width="420" alt="compact">
+
 
 ## Requirements | 环境要求
 

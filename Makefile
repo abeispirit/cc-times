@@ -5,7 +5,7 @@ SRC      = $(wildcard Sources/*.swift)
 BUNDLE_ID = com.abesf.cc-times
 LOGS_DIR = logs
 
-.PHONY: start stop restart build start-only clean dmg icon
+.PHONY: start stop restart build start-only clean dmg icon shots
 
 # ── Build ─────────────────────────────────────────────────────────────────
 # Command-line compile (no Xcode). No fixed -target so it builds natively on
@@ -48,6 +48,13 @@ icon:
 	@cp scripts/AppIcon.icns .
 	@echo "✓ icon: AppIcon.icns"
 
+# ── Render promotional screenshots into screenshots/ (offscreen CoreGraphics)
+shots:
+	@cd scripts && swiftc make_shots.swift -o make_shots \
+		-framework AppKit -framework CoreGraphics -framework ImageIO
+	@./scripts/make_shots
+	@echo "✓ screenshots rendered to screenshots/"
+
 # ── Build a .app bundle (with icon + Info.plist) ──────────────────────────
 bundle: build icon
 	@rm -rf $(APP)
@@ -80,5 +87,6 @@ dmg: bundle
 
 # ── Clean ─────────────────────────────────────────────────────────────────
 clean:
-	@rm -rf $(BIN) $(APP) $(DMG) $(LOGS_DIR) .build scripts/AppIcon.iconset scripts/make_icon
+	@rm -rf $(BIN) $(APP) $(DMG) $(LOGS_DIR) .build \
+		scripts/AppIcon.iconset scripts/make_icon scripts/make_shots
 	@echo "cleaned"
