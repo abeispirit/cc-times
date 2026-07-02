@@ -30,6 +30,9 @@ quietly out of the way.
 
 ## Screenshots | 截图
 
+**All six themes side by side:**
+<br><img src="screenshots/themes-compare.png" width="900" alt="six themes compared">
+
 **Per-clock colors** — each clock can have its own theme:
 <br><img src="screenshots/full-multicolor.png" width="640" alt="per-clock colors">
 

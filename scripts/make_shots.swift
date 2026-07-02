@@ -26,6 +26,9 @@ let sunset = Pal(card: .init(kind: .grad([CGColor(red:0.22,green:0.04,blue:0.12,
 let slate = Pal(card: .init(kind: .solid(CGColor(red:0.13,green:0.18,blue:0.26,alpha:0.55))),
     face: .init(kind: .solid(CGColor(red:0.13,green:0.18,blue:0.26,alpha:0.6))),
     text: CGColor(red:0.86,green:0.93,blue:1,alpha:1), second: CGColor(red:0.35,green:0.85,blue:0.95,alpha:1), tick:0.45)
+let sand = Pal(card: .init(kind: .solid(CGColor(red:0.95,green:0.90,blue:0.80,alpha:0.9))),
+    face: .init(kind: .solid(CGColor(red:0.95,green:0.90,blue:0.80,alpha:0.92))),
+    text: CGColor(red:0.27,green:0.18,blue:0.10,alpha:1), second: CGColor(red:0.90,green:0.45,blue:0.15,alpha:1), tick:0.5)
 
 // ── Drawing helpers ────────────────────────────────────────────────────────
 func fillBg(_ bg: BG, in r: CGRect, ctx: CGContext) {
@@ -153,4 +156,8 @@ renderRow(name: "full-sunset", pals: [sunset,sunset,sunset,sunset],
 renderRow(name: "full-multicolor", pals: [neon,aurora,sunset,slate],
           cities: ["北京","Tokyo","London","New York"],
           t: [(10,30,15),(11,30,15),(3,30,15),(22,30,15)])
+// All six themes side by side for comparison.
+renderRow(name: "themes-compare", pals: [midnight, slate, sand, neon, aurora, sunset],
+          cities: ["Midnight","Slate","Sand","Neon Black","Aurora","Sunset"],
+          t: [(10,30,15),(10,30,15),(10,30,15),(10,30,15),(10,30,15),(10,30,15)])
 print("done")
