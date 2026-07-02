@@ -3,8 +3,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![macOS](https://img.shields.io/badge/macOS-12.0%2B-blue.svg)](https://www.apple.com/macos/)
 
-> 仓库地址:<https://github.com/abesf/macostimes> · 项目名:**cc-times**
-
 **🌐 语言:** [中文(默认)](#中文) · [English ▶ 点击展开](#english)
 
 ---
