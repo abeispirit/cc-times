@@ -5,11 +5,11 @@ SRC      = $(wildcard Sources/*.swift)
 BUNDLE_ID = com.abesf.cc-times
 LOGS_DIR = logs
 
-.PHONY: start stop restart build start-only clean dmg icon shots
+.PHONY: start stop restart build build-universal start-only clean dmg icon shots
 
-# ── Build ─────────────────────────────────────────────────────────────────
+# ── Build (native, for local dev/run) ─────────────────────────────────────
 # Command-line compile (no Xcode). No fixed -target so it builds natively on
-# both Intel and Apple Silicon.
+# the current machine (Intel or Apple Silicon).
 build:
 	@swiftc \
 		$(SRC) \
@@ -17,6 +17,20 @@ build:
 		-framework AppKit \
 		-framework SwiftUI
 	@echo "✓ built: ./$(BIN)"
+
+# ── Build a Universal binary (arm64 + x86_64) for distribution ───────────
+# Compiles each architecture separately, then merges with lipo so one binary
+# runs natively on both Apple Silicon and Intel Macs.
+build-universal:
+	@echo "==> building arm64 (first run may take a few min to build the arm64 stdlib)..."
+	@swiftc -target arm64-apple-macos12 $(SRC) -o $(BIN).arm64 -framework AppKit -framework SwiftUI
+	@echo "==> building x86_64..."
+	@swiftc -target x86_64-apple-macos12 $(SRC) -o $(BIN).x86_64 -framework AppKit -framework SwiftUI
+	@echo "==> merging with lipo..."
+	@lipo -create -output $(BIN) $(BIN).arm64 $(BIN).x86_64
+	@rm -f $(BIN).arm64 $(BIN).x86_64
+	@echo "✓ built universal: ./$(BIN)"
+	@lipo -info $(BIN)
 
 # ── Run (launches GUI in background, logs to logs/app.log) ────────────────
 start: build
@@ -56,7 +70,8 @@ shots:
 	@echo "✓ screenshots rendered to screenshots/"
 
 # ── Build a .app bundle (with icon + Info.plist) ──────────────────────────
-bundle: build icon
+# Uses the universal binary so the bundle runs on Apple Silicon + Intel.
+bundle: build-universal icon
 	@rm -rf $(APP)
 	@mkdir -p $(APP)/Contents/MacOS $(APP)/Contents/Resources
 	@cp $(BIN) $(APP)/Contents/MacOS/$(BIN)
@@ -78,15 +93,14 @@ bundle: build icon
 		'</dict></plist>' > $(APP)/Contents/Info.plist
 	@echo "✓ bundle: $(APP)/"
 
-# ── Build a .dmg from the .app bundle (unsigned, for self/OSS use) ────────
+# ── Build a Universal .dmg (arm64 + x86_64, unsigned) for release ────────
 dmg: bundle
 	@rm -f $(DMG)
 	@hdiutil create -volname "$(BIN)" -srcfolder $(APP) -ov -format UDZO $(DMG) 2>&1 | tail -1
-	@echo "✓ dmg: $(DMG)"
-	@echo "  (unsigned — see README for first-launch instructions)"
+	@echo "✓ dmg: $(DMG) (universal, unsigned — see README for first-launch)"
 
 # ── Clean ─────────────────────────────────────────────────────────────────
 clean:
-	@rm -rf $(BIN) $(APP) $(DMG) $(LOGS_DIR) .build \
+	@rm -rf $(BIN) $(BIN).arm64 $(BIN).x86_64 $(APP) $(DMG) $(LOGS_DIR) .build \
 		scripts/AppIcon.iconset scripts/make_icon scripts/make_shots
 	@echo "cleaned"
