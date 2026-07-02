@@ -3,6 +3,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![macOS](https://img.shields.io/badge/macOS-12.0%2B-blue.svg)](https://www.apple.com/macos/)
 
+> Repo: <https://github.com/abesf/macostimes> · Project name: **cc-times**
+
 A lightweight desktop clock that stays on your macOS desktop and shows the time
 in multiple world cities at a glance. Transparent, borderless, draggable, and
 quietly out of the way.
