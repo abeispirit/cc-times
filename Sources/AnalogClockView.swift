@@ -14,7 +14,7 @@ struct AnalogClockView: View {
             let radius = min(size.width, size.height) / 2 - Const.faceInset
 
             // Time components in the target time zone.
-            var cal = Calendar(identifier: .gregorian)
+            var cal = Self.calendar
             cal.timeZone = timeZone
             let comps = cal.dateComponents([.hour, .minute, .second], from: now)
             let h = CGFloat(comps.hour ?? 0)
@@ -63,6 +63,9 @@ struct AnalogClockView: View {
         }
         .frame(width: Const.faceSize, height: Const.faceSize)
     }
+
+    /// Shared gregorian calendar; only timeZone is reassigned per frame.
+    private static let calendar = Calendar(identifier: .gregorian)
 
     private func drawHand(_ ctx: GraphicsContext, _ center: CGPoint,
                           angleDeg: CGFloat, length: CGFloat, width: CGFloat, color: Color) {

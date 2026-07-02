@@ -77,18 +77,23 @@ struct ClockCardView: View {
         CityRegistry.localizedName(for: config.timeZoneID, language)
     }
 
-    /// 24-hour digital time in the card's time zone. Formatter is cached
-    /// (TimelineView redraws every second, so re-creating it would waste work).
+    /// 24-hour digital time in the card's time zone. Formatters are cached per
+    /// time zone id and never mutated after creation, so they are safe to share
+    /// even if SwiftUI body evaluation ever moves off the main thread.
     private var digitalString: String {
-        Self.formatter.timeZone = config.timeZone
-        return Self.formatter.string(from: now)
+        Self.formatter(for: config.timeZoneID)?.string(from: now) ?? "--:--"
     }
 
-    private static var formatter: DateFormatter = {
+    private static var formatterCache: [String: DateFormatter] = [:]
+    private static func formatter(for tzID: String) -> DateFormatter? {
+        if let cached = formatterCache[tzID] { return cached }
+        guard let tz = TimeZone(identifier: tzID) else { return nil }
         let f = DateFormatter()
         f.dateFormat = "HH:mm"
+        f.timeZone = tz
+        formatterCache[tzID] = f   // cached value is never mutated afterwards
         return f
-    }()
+    }
 
     private enum Const {
         static let stackSpacing: CGFloat = 8

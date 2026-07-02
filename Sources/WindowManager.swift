@@ -12,8 +12,9 @@ final class WindowManager {
         let rootView = ClockRowView(store: store, l10n: l10n)
         let hosting = NSHostingController(rootView: rootView)
 
-        let w = DraggableDesktopWindow(contentRect: WindowMetrics.size(forCompact: store.settings.compact),
-                                       store: store, l10n: l10n)
+        let initial = WindowMetrics.size(forCompact: store.settings.compact,
+                                         clockCount: store.clocks.count)
+        let w = DraggableDesktopWindow(contentRect: initial, store: store, l10n: l10n)
         w.contentViewController = hosting
 
         // Transparent borderless floating window (draggable).
@@ -27,8 +28,10 @@ final class WindowManager {
         w.isMovableByWindowBackground = true
         w.alphaValue = CGFloat(store.settings.opacity)
 
-        // Place at the top-center of the main screen.
-        let lockedSize = WindowMetrics.size(forCompact: store.settings.compact)
+        // Size: width follows the number of clocks so compact content is never
+        // clipped; full mode uses the fixed size.
+        let lockedSize = WindowMetrics.size(forCompact: store.settings.compact,
+                                            clockCount: store.clocks.count)
         w.setContentSize(lockedSize)
         w.contentMinSize = WindowMetrics.minSize
         let mainScreen = NSScreen.screens.first { $0.frame.origin == .zero }
@@ -42,7 +45,6 @@ final class WindowManager {
         }
 
         w.makeKeyAndOrderFront(nil)
-        w.setContentSize(lockedSize) // re-lock after hosting may have resized it
         self.window = w
     }
 }
@@ -237,7 +239,8 @@ final class DraggableDesktopWindow: NSWindow {
 
     /// Set the global default theme.
     @objc private func setGlobalTheme(_ sender: NSMenuItem) {
-        guard let raw = sender.representedObject as? String else { return }
+        guard let raw = sender.representedObject as? String,
+              Theme(rawValue: raw) != nil else { return }   // reject invalid ids
         store.settings.theme = raw
     }
 
@@ -257,24 +260,46 @@ final class DraggableDesktopWindow: NSWindow {
     @objc private func addClock(_ sender: NSMenuItem) {
         guard let tzID = sender.representedObject as? String else { return }
         store.add(timeZoneID: tzID)
+        resyncSize()
     }
 
     @objc private func removeClock(_ sender: NSMenuItem) {
         guard let id = sender.representedObject as? UUID else { return }
         store.remove(id)
+        resyncSize()
+    }
+
+    /// Resize the window to fit current content (compact width follows the
+    /// clock count), keeping the horizontal center fixed.
+    private func resyncSize() {
+        let newSize = WindowMetrics.size(forCompact: store.settings.compact,
+                                         clockCount: store.clocks.count)
+        var f = frame
+        let oldCenterX = f.midX
+        f.size = newSize
+        f.origin.x = oldCenterX - newSize.width / 2
+        setFrame(f, display: true, animate: false)
     }
 }
 
-/// Window sizing constants, kept in one place so full/compact sizes are never
-/// out of sync between creation and resize.
+/// Window sizing, kept in one place so full/compact sizes stay in sync.
+/// Compact width scales with the number of clocks (fixedSize content must not
+/// be clipped by a locked window frame).
 enum WindowMetrics {
     static let minSize = NSSize(width: 200, height: 50)
     static let topMargin: CGFloat = 30
 
     static let fullSize = NSSize(width: 760, height: 240)
-    static let compactSize = NSSize(width: 360, height: 60)
+    static let compactHeight: CGFloat = 60
+    /// Approximate per-clock width in compact mode (city + time chip + padding).
+    static let compactClockWidth: CGFloat = 170
+    static let compactBaseWidth: CGFloat = 40
 
-    static func size(forCompact compact: Bool) -> NSSize {
-        compact ? compactSize : fullSize
+    static func size(forCompact compact: Bool, clockCount: Int = 2) -> NSSize {
+        if compact {
+            let w = compactBaseWidth + compactClockWidth * CGFloat(max(clockCount, 1))
+            return NSSize(width: w, height: compactHeight)
+        }
+        return fullSize
     }
 }
