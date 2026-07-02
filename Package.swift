@@ -2,11 +2,11 @@
 import PackageDescription
 
 let package = Package(
-    name: "mtimes",
+    name: "cc-times",
     platforms: [.macOS(.v12)],
     targets: [
         .executableTarget(
-            name: "mtimes",
+            name: "cc-times",
             path: "Sources"
         )
     ]

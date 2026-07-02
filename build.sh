@@ -1,18 +1,19 @@
 #!/bin/bash
-# 一键编译脚本:命令行编译 mtimes(macOS 多时区桌面时钟)
-# 用法: ./build.sh   产出可执行文件 ./mtimes
+# One-shot build script for cc-times (macOS multi-timezone desktop clock).
+# Usage: ./build.sh   produces ./cc-times
+# (Makefile is the canonical entry point; this is kept for convenience.)
 set -e
 
 cd "$(dirname "$0")"
 
-echo "==> 编译 mtimes ..."
-# 不依赖 SwiftPM 拉网络,直接 swiftc 单步编译所有源文件
+echo "==> building cc-times ..."
+# Direct swiftc single-step compile (no SwiftPM network fetch).
+# No fixed -target so it builds natively on both Intel and Apple Silicon.
 swiftc \
-    -target x86_64-apple-macos12 \
     Sources/*.swift \
-    -o mtimes \
+    -o cc-times \
     -framework AppKit \
     -framework SwiftUI
 
-echo "==> 编译完成: $(pwd)/mtimes"
-echo "==> 运行: ./mtimes"
+echo "==> built: $(pwd)/cc-times"
+echo "==> run:   ./cc-times"

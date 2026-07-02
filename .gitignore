@@ -1,5 +1,6 @@
 # 编译产物
 /mtimes
+/cc-times
 /.build/
 
 # 日志
@@ -11,3 +12,7 @@
 # SwiftPM
 Package.resolved
 *.xcodeproj
+AppIcon.iconset/
+cc-times.dmg
+cc-times.app/
+AppIcon.icns

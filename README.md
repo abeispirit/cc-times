@@ -1,4 +1,4 @@
-# macostimes · Multi-Timezone Desktop Clock for macOS
+# cc-times · Multi-Timezone Desktop Clock for macOS
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![macOS](https://img.shields.io/badge/macOS-12.0%2B-blue.svg)](https://www.apple.com/macos/)
@@ -65,7 +65,10 @@ The clock appears at the top-center of your main display.
 | `make stop` | Stop the running clock |
 | `make restart` | Rebuild + restart |
 | `make build` | Build only |
-| `make clean` | Remove build artifacts and logs |
+| `make icon` | Generate `AppIcon.icns` from the CoreGraphics script |
+| `make bundle` | Build a signed-ready `.app` bundle (with icon) |
+| `make dmg` | Build a `.dmg` from the `.app` bundle |
+| `make clean` | Remove build artifacts, bundle, dmg and logs |
 
 ## Right-Click Menu | 右键菜单
 
@@ -73,7 +76,9 @@ Right-click the clock window to:
 
 ```
 Remove Time Zone   ▶  pick a city to remove
-Add Time Zone      ▶  Beijing / Tokyo / London / ... (14 cities)
+Add Time Zone      ▶  Los Angeles / Beijing / Tokyo / ... (24 cities, each with UTC offset)
+Theme              ▶  Midnight / Slate / Sand / Neon Black / Aurora / Sunset
+Per-Clock Color    ▶  override a single clock's theme (or follow global)
 Window Opacity     ▶  100% / 80% / 60% / 45% / 30%
 Language           ▶  中文 / English
 ✓ Always on Top       toggle floating / normal window level
@@ -81,6 +86,18 @@ Language           ▶  中文 / English
 ─────────
 Quit
 ```
+
+## Installing the DMG | 安装 DMG
+
+The DMG is **not code-signed** (this is a personal open-source project; see
+[Contributing](#contributing)). To open it the first time:
+
+1. Mount the `.dmg` and drag `cc-times.app` to `/Applications`.
+2. **Right-click** the app → **Open** → confirm in the Gatekeeper dialog
+   (a one-time step). Or run in Terminal:
+   `xattr -d com.apple.quarantine /Applications/cc-times.app`
+
+> DMG 未签名(个人开源项目,见[贡献说明](#contributing))。首次打开:右键 App → 打开 → 确认(仅一次);或终端执行 `xattr -d com.apple.quarantine /Applications/cc-times.app`。
 
 ## Configuration | 配置
 
@@ -108,11 +125,14 @@ Sources/
 ├── ClockApp.swift          # entry point + AppDelegate
 ├── WindowManager.swift     # window setup + context menu + window metrics
 ├── ClockStore.swift        # clock list + persisted settings
+├── Theme.swift             # 6 color themes (solid + neon gradients)
 ├── L10n.swift              # i18n: languages, string tables, runtime switch
-├── CityRegistry.swift      # curated city list + localized city names
+├── CityRegistry.swift      # 24 curated cities (one per UTC offset) + localized names
 ├── AnalogClockView.swift   # Canvas-drawn analog face
 ├── ClockCardView.swift     # single clock card (full / compact)
 └── ClockRowView.swift      # horizontal row of clocks, per-second refresh
+scripts/
+└── make_icon.swift         # generates AppIcon.icns (CoreGraphics, no deps)
 ```
 
 ## Known Limitations | 已知限制
