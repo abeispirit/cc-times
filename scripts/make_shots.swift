@@ -65,14 +65,14 @@ func drawClock(ctx: CGContext, c: CGPoint, rad: CGFloat, h:CGFloat, m:CGFloat, s
         let len: CGFloat = card ? 12 : 7
         ctx.setStrokeColor(pal.text.copy(alpha: card ? 0.9 : pal.tick)!)
         ctx.setLineWidth(card ? 2.5 : 1.2)
-        ctx.move(to: .init(x:c.x+cos(ang)*rad, y:c.y+sin(ang)*rad))
-        ctx.addLine(to: .init(x:c.x+cos(ang)*(rad-len), y:c.y+sin(ang)*(rad-len)))
+        ctx.move(to: .init(x:c.x+CoreGraphics.cos(ang)*rad, y:c.y+CoreGraphics.sin(ang)*rad))
+        ctx.addLine(to: .init(x:c.x+CoreGraphics.cos(ang)*(rad-len), y:c.y+CoreGraphics.sin(ang)*(rad-len)))
         ctx.strokePath()
     }
     let hand = { (deg:CGFloat, len:CGFloat, w:CGFloat, col:CGColor) in
         let a = deg*CGFloat.pi/180
         ctx.setStrokeColor(col); ctx.setLineWidth(w); ctx.setLineCap(.round)
-        ctx.move(to: c); ctx.addLine(to: .init(x:c.x+cos(a)*len, y:c.y+sin(a)*len)); ctx.strokePath()
+        ctx.move(to: c); ctx.addLine(to: .init(x:c.x+CoreGraphics.cos(a)*len, y:c.y+CoreGraphics.sin(a)*len)); ctx.strokePath()
     }
     hand((h.truncatingRemainder(dividingBy:12)+m/60)*30-90, rad*0.5, 4, pal.text.copy(alpha:0.95)!)
     hand(m*6-90, rad*0.75, 2.5, pal.text.copy(alpha:0.9)!)

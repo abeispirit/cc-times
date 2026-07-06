@@ -67,8 +67,8 @@ func drawIcon(size S: CGFloat) -> CGImage {
         ctx.restoreGState()
 
         // Needle dot at the arc's leading end (the "hand").
-        let end = CGPoint(x: center.x + cos(deg2rad(o.endDeg)) * o.radius,
-                          y: center.y + sin(deg2rad(o.endDeg)) * o.radius)
+        let end = CGPoint(x: center.x + CoreGraphics.cos(deg2rad(o.endDeg)) * o.radius,
+                          y: center.y + CoreGraphics.sin(deg2rad(o.endDeg)) * o.radius)
         let dotR = S * 0.032
         ctx.saveGState()
         ctx.setFillColor(CGColor(gray: 1.0, alpha: 1.0))

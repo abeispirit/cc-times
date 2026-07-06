@@ -33,11 +33,11 @@ struct AnalogClockView: View {
             for i in 0..<12 {
                 let cardinal = i % 3 == 0
                 let tickLen = cardinal ? Const.cardinalTickLen : Const.minorTickLen
-                let angle = Angle.degrees(Double(i) * 30 - 90).radians
-                let outer = CGPoint(x: center.x + cos(angle) * radius,
-                                    y: center.y + sin(angle) * radius)
-                let inner = CGPoint(x: center.x + cos(angle) * (radius - tickLen),
-                                    y: center.y + sin(angle) * (radius - tickLen))
+                let a = CGFloat(Angle.degrees(Double(i) * 30 - 90).radians)
+                let outer = CGPoint(x: center.x + cos(a) * radius,
+                                    y: center.y + sin(a) * radius)
+                let inner = CGPoint(x: center.x + cos(a) * (radius - tickLen),
+                                    y: center.y + sin(a) * (radius - tickLen))
                 let opacity = cardinal ? Const.cardinalTickOpacity : palette.tickOpacity
                 ctx.stroke(Path { p in p.move(to: outer); p.addLine(to: inner) },
                            with: .color(palette.textColor.opacity(opacity)),
@@ -69,8 +69,8 @@ struct AnalogClockView: View {
 
     private func drawHand(_ ctx: GraphicsContext, _ center: CGPoint,
                           angleDeg: CGFloat, length: CGFloat, width: CGFloat, color: Color) {
-        let angle = Angle.degrees(Double(angleDeg)).radians
-        let end = CGPoint(x: center.x + cos(angle) * length, y: center.y + sin(angle) * length)
+        let a = CGFloat(Angle.degrees(Double(angleDeg)).radians)
+        let end = CGPoint(x: center.x + cos(a) * length, y: center.y + sin(a) * length)
         ctx.stroke(Path { p in p.move(to: center); p.addLine(to: end) },
                    with: .color(color), lineWidth: width)
     }
